@@ -1658,6 +1658,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
                 <span>{quantity}</span>
                 <span className="inline-block w-0.5 h-9 ml-0.5 animate-pulse" style={{ background: '#01A99D' }} />
               </div>
+              <div className={`mt-4 h-7 ${entryCurrency !== defaultCurrency ? 'mb-6' : ''}`} aria-hidden="true" />
             </div>
 
             <div className="grid grid-cols-4 gap-2.5 mb-2">
