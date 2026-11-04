@@ -886,9 +886,6 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
   const [searchOpen, setSearchOpen] = useState(false);
   // Long lists render in chunks (more rows load as you scroll) so big ledgers stay snappy.
   const [rowLimit, setRowLimit] = useState(60);
-  // Which list screen (4 or 5) just did a "jump", so a Back to top button can be offered.
-  const [jumpedScreen, setJumpedScreen] = useState(null);
-  const leftTopRef = useRef(false);
   const totalsScrollRef = useRef(null);
   const [dailyLimit, setDailyLimit] = useState(45);
   const [searchQuery, setSearchQuery] = useState('');
@@ -1466,35 +1463,13 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
   const monthlyTotals = useMemo(() => rollupOf(dailyTotals, (d) => monthKeyOf(d)), [dailyTotals]);
   const yearlyTotals = useMemo(() => rollupOf(dailyTotals, (d) => String(d.getFullYear())), [dailyTotals]);
 
-  // Clear the Back to top button when changing screen or switching the totals view.
-  useEffect(() => {
-    setJumpedScreen(null);
-  }, [screen, totalsView]);
-
-  const markJumped = (screenNum) => {
-    // Show the button right away and keep it until the user taps it, changes screen/view,
-    // or scrolls back to the top by hand after having left it.
-    leftTopRef.current = false;
-    setJumpedScreen(screenNum);
-  };
-
-  const hideTopButtonWhenAtTop = (ev) => {
-    const top = ev.currentTarget.scrollTop;
-    if (top > 150) leftTopRef.current = true;
-    if (leftTopRef.current && top < 24) {
-      leftTopRef.current = false;
-      setJumpedScreen(null);
-    }
-  };
-
   const backToTop = () => {
-    const listRef = jumpedScreen === 4 ? logScrollRef : totalsScrollRef;
+    const listRef = screen === 4 ? logScrollRef : totalsScrollRef;
     const list = listRef.current;
     if (list && list.scrollTo) list.scrollTo({ top: 0, behavior: 'smooth' });
     if (window.scrollTo) window.scrollTo({ top: 0, behavior: 'smooth' });
     const dialog = list && list.closest ? list.closest('[role="dialog"]') : null;
     if (dialog && dialog.scrollTo) dialog.scrollTo({ top: 0, behavior: 'smooth' });
-    setJumpedScreen(null);
   };
 
   useEffect(() => {
@@ -1507,7 +1482,6 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
     if (dayRefs.current[scrollToDay]) {
       dayRefs.current[scrollToDay].scrollIntoView({ behavior: 'smooth', block: 'start' });
       setScrollToDay(null);
-      markJumped(4);
     }
   }, [screen, scrollToDay, entries, rowLimit, entryRows]);
 
@@ -1523,7 +1497,6 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
     if (monthRefs.current[scrollToMonth]) {
       monthRefs.current[scrollToMonth].scrollIntoView({ behavior: 'smooth', block: 'start' });
       setScrollToMonth(null);
-      markJumped(5);
     }
   }, [screen, scrollToMonth, entries, totalsView, dailyLimit, dailyTotals]);
 
@@ -1543,7 +1516,8 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
 
       <div
         className="w-full max-w-sm flex flex-col"
-        style={{ background: '#0F1210', minHeight: '100dvh', position: 'relative' }}
+        // Ledger and Totals screens are locked to the viewport so their lists scroll inside the dashed box.
+        style={{ background: '#0F1210', minHeight: '100dvh', height: screen >= 4 ? '100dvh' : undefined, position: 'relative' }}
       >
         <PerfEdge />
 
@@ -1772,7 +1746,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
 
         {/* SCREEN 4 */}
         {screen === 4 && (
-          <div className="flex-1 flex flex-col px-5 pb-8">
+          <div className="flex-1 min-h-0 flex flex-col px-5 pb-8">
             <TopBar
               title={loggers.find((l) => l.id === activeLoggerId)?.name || 'My Ledger'}
               stepLabel="Ledger"
@@ -1848,7 +1822,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
             </div>
 
             <div
-              className="flex-1 rounded-2xl overflow-hidden"
+              className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden"
               style={{ background: 'rgba(245,243,238,0.03)', border: '1px dashed rgba(245,243,238,0.15)' }}
             >
               <div className="px-4 py-3 flex text-[11px] uppercase tracking-[0.15em]" style={{ color: '#7C8883', borderBottom: '1px dashed rgba(245,243,238,0.1)' }}>
@@ -1871,11 +1845,8 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
 
               <div
                 ref={logScrollRef}
-                className="max-h-[52vh] overflow-y-auto"
-                onScroll={(ev) => {
-                  loadMoreOnScroll(ev, entryRows.length, setRowLimit, 60);
-                  hideTopButtonWhenAtTop(ev);
-                }}
+                className="flex-1 min-h-0 overflow-y-auto"
+                onScroll={(ev) => loadMoreOnScroll(ev, entryRows.length, setRowLimit, 60)}
               >
                 {entryRows.slice(0, rowLimit).map((r) => (
                   <EntryRow
@@ -1895,7 +1866,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
 
         {/* SCREEN 5 */}
         {screen === 5 && (
-          <div className="flex-1 flex flex-col px-5 pb-8">
+          <div className="flex-1 min-h-0 flex flex-col px-5 pb-8">
             <TopBar
               title={totalsView === 'daily' ? 'Daily Totals' : 'Monthly & Yearly Totals'}
               stepLabel="Totals"
@@ -1930,7 +1901,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
             </div>
 
             <div
-              className="flex-1 rounded-2xl overflow-hidden"
+              className="flex-1 min-h-0 flex flex-col rounded-2xl overflow-hidden"
               style={{ background: 'rgba(245,243,238,0.03)', border: '1px dashed rgba(245,243,238,0.15)' }}
             >
               {dailyTotals.length === 0 && (
@@ -1940,7 +1911,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
               )}
 
               {totalsView === 'summary' && (
-                <div ref={totalsScrollRef} className="max-h-[52vh] overflow-y-auto" onScroll={hideTopButtonWhenAtTop}>
+                <div ref={totalsScrollRef} className="flex-1 min-h-0 overflow-y-auto">
                   {yearlyTotals.map((y) => (
                     <div key={y.key}>
                       <div className="px-4 py-2 flex items-center justify-between" style={{ background: 'rgba(1,169,157,0.08)' }}>
@@ -2013,11 +1984,8 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
               {totalsView === 'daily' && (
               <div
                 ref={totalsScrollRef}
-                className="max-h-[52vh] overflow-y-auto"
-                onScroll={(ev) => {
-                  loadMoreOnScroll(ev, dailyTotals.length, setDailyLimit, 45);
-                  hideTopButtonWhenAtTop(ev);
-                }}
+                className="flex-1 min-h-0 overflow-y-auto"
+                onScroll={(ev) => loadMoreOnScroll(ev, dailyTotals.length, setDailyLimit, 45)}
               >
                 {dailyTotals.slice(0, dailyLimit).map((d, i) => {
                   const monthKey = monthKeyOf(d.date);
@@ -2227,7 +2195,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
               onClick={onExitDemo}
               className="fixed text-xs font-semibold underline underline-offset-2 px-3 py-1 rounded-full"
               style={{
-                bottom: 10,
+                bottom: 3,
                 left: '50%',
                 transform: 'translateX(-50%)',
                 color: '#01A99D',
@@ -2256,14 +2224,14 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
           </>
         )}
 
-        {jumpedScreen !== null && jumpedScreen === screen && (
+        {(screen === 4 || screen === 5) && (
           <button
             onClick={backToTop}
             className="fixed flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold shadow-xl"
             style={{
-              bottom: 44,
-              left: '50%',
-              transform: 'translateX(-50%)',
+              bottom: 16,
+              // Bottom-right of the app column (max-w-sm = 384px), or of the screen on phones.
+              right: 'max(16px, calc(50% - 176px))',
               background: '#171C19',
               border: '1px solid rgba(245,243,238,0.15)',
               color: '#F5F3EE',
