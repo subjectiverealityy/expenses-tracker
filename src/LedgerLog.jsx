@@ -788,7 +788,7 @@ function SettingsScreen({
           {/* Help */}
           <p className="text-xs uppercase tracking-[0.15em] mb-2" style={{ color: '#7C8883', fontFamily: 'Manrope' }}>Help</p>
           <p className="text-[11px] mb-3" style={{ color: '#7C8883', fontFamily: 'Manrope' }}>
-            Double-tap to delete items or nullify entries.
+            Tip: Double-tap to delete items or nullify entries.
           </p>
           <button
             onClick={onReplayWalkthrough}
