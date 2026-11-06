@@ -2224,7 +2224,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
           </>
         )}
 
-        {(screen === 4 || screen === 5) && (
+        {(screen === 4 || screen === 5) && !showSettings && (
           <button
             onClick={backToTop}
             className="fixed flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold shadow-xl"
