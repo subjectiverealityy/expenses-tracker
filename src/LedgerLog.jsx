@@ -1606,7 +1606,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
         {screen === 2 && (
           <div className="flex-1 flex flex-col px-5 pb-28">
             <TopBar
-              title="How many?"
+              title={selectedItem}
               step={2}
               onBack={() => setScreen(1)}
               right={
@@ -1810,7 +1810,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
                 className="flex-1 py-3 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
                 style={{ background: '#01A99D', color: '#0F1210', fontFamily: 'Manrope' }}
               >
-                <Plus size={16} strokeWidth={3} /> Log another
+                <Plus size={16} strokeWidth={3} /> New Entry
               </button>
               <button
                 onClick={() => setScreen(5)}
