@@ -647,7 +647,7 @@ const WALKTHROUGH_SLIDES = [
   },
 ];
 
-function Walkthrough({ open, step, setStep, onDismiss }) {
+function Walkthrough({ open, step, setStep, onDismiss, onTryDemo }) {
   if (!open) return null;
   const slide = WALKTHROUGH_SLIDES[step];
   const isLast = step === WALKTHROUGH_SLIDES.length - 1;
@@ -698,6 +698,16 @@ function Walkthrough({ open, step, setStep, onDismiss }) {
             {isLast ? 'Get started' : 'Next'}
           </button>
         </div>
+
+        {onTryDemo && (
+          <button
+            onClick={onTryDemo}
+            className="w-full mt-2.5 py-3 rounded-2xl text-sm font-semibold"
+            style={{ background: 'rgba(1,169,157,0.08)', border: '1px solid rgba(1,169,157,0.4)', color: '#01A99D', fontFamily: 'Manrope' }}
+          >
+            Try a demo with sample entries
+          </button>
+        )}
 
         <button
           onClick={onDismiss}
@@ -2243,7 +2253,13 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
           </button>
         )}
 
-        <Walkthrough open={showWalkthrough} step={walkthroughStep} setStep={setWalkthroughStep} onDismiss={dismissWalkthrough} />
+        <Walkthrough
+          open={showWalkthrough}
+          step={walkthroughStep}
+          setStep={setWalkthroughStep}
+          onDismiss={dismissWalkthrough}
+          onTryDemo={demo ? undefined : onOpenDemo}
+        />
 
         <ConfirmModal
           open={!!ledgerPendingDelete}
