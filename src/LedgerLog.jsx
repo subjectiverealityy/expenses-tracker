@@ -985,6 +985,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
 
   const [showWalkthrough, setShowWalkthrough] = useState(false);
   const [walkthroughStep, setWalkthroughStep] = useState(0);
+  const itemSearchRef = useRef(null);
 
   const [ledgerPendingDelete, setLedgerPendingDelete] = useState(null);
   const [editingLoggerId, setEditingLoggerId] = useState(null);
@@ -1054,6 +1055,8 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
     setShowWalkthrough(false);
     setWalkthroughStep(0);
     storage.set('ledgerlog-seen-walkthrough', 'true', false).catch(() => {});
+    // Focus the Step 1 search box right away (inside the tap) so phones open the keyboard.
+    if (itemSearchRef.current) itemSearchRef.current.focus();
   };
 
   const replayWalkthrough = () => {
@@ -1566,6 +1569,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
             >
               <Search size={16} color="#F5F3EE" />
               <input
+                ref={itemSearchRef}
                 value={query1}
                 onChange={(e) => setQuery1(e.target.value)}
                 placeholder="Search or add an item"
@@ -2179,7 +2183,7 @@ function LedgerApp({ demo = false, onOpenDemo, onExitDemo }) {
           />
         )}
 
-        {!demo && (
+        {!demo && !showWalkthrough && (
           <button
             onClick={onOpenDemo}
             className="absolute text-[11px] underline underline-offset-2"
